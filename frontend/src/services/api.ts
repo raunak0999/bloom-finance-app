@@ -1,11 +1,19 @@
-import axios from "axios";
+import axios, { type AxiosInstance } from 'axios';
 
-const api = axios.create({
-  baseURL: "http://localhost:5001/api",
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+
+const api: AxiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -15,45 +23,39 @@ api.interceptors.request.use((config) => {
 
 export const authAPI = {
   register: async (fullName: string, email: string, password: string, country: string) => {
-    return api.post('/register', { fullName, email, password, country });
+    const response = await api.post('/register', { name: fullName, email, password, country });
+    return response.data;
   },
   login: (email: string, password: string) =>
     api.post('/login', { email, password }),
-};  
-
+};
 
 
 export const transactionAPI = {
-  getAll: () => api.get('/transactions'),  // 🔥 Uses interceptor token!
+  getAll: () => api.get('/transactions'),
   create: (data: any) => api.post('/transactions', data),
   update: (id: string, data: any) => api.put(`/transactions/${id}`, data),
   delete: (id: string) => api.delete(`/transactions/${id}`),
 };
 
 
-
-
 export const budgetAPI = {
-  get: () => api.get('/budgets'),
-  create: (data: any) => api.post('/budgets', data),
-  update: (data: any) => api.put('/budgets', data),
-  delete: (id: string) => api.delete(`/budgets/${id}`),
+  get: () => api.get('/budget'),
+  update: (data: any) => api.put('/budget', data),
 };
 
 
 export const goalAPI = {
-  getAll: () => api.get('/goals'),  // 🔥 Already has token!
-  // ... rest unchanged
+  getAll: () => api.get('/goals'),
+  create: (data: any) => api.post('/goals', data),
+  update: (id: string, data: any) => api.put(`/goals/${id}`, data),
+  delete: (id: string) => api.delete(`/goals/${id}`),
 };
+
 
 export const aiAPI = {
-  getTips: () => api.get('/ai/tips'),  // 🔥 Already has token!
+  getTips: () => api.get('/ai/tips'),
 };
-
-export const investmentAPI = {
-  getByCountry: (country: string) => api.get(`/investments/${country}`),
-};
-
 
 
 export default api;

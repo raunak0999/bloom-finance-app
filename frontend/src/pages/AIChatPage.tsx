@@ -35,7 +35,7 @@ const AIChatPage = () => {
       if (userId) payload.userId = userId;
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/ai/chat`,
+        `${import.meta.env.VITE_API_URL}/api/ai/chat`,
         payload,
         {
           headers: {

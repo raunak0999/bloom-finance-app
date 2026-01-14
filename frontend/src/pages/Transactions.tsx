@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { transactionAPI } from '../services/api';
-import toast from 'react-hot-toast';
+import api from '../services/api';
 
 interface Transaction {
   _id: string;
@@ -24,24 +23,20 @@ const Transactions = () => {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Food');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (user && token) {
-      fetchTransactions();
-    }
-  }, [user]);
+    fetchTransactions();
+  }, []);
 
   const fetchTransactions = async () => {
     try {
-      const response = await transactionAPI.getAll();
+      const response = await api.get('/transactions');
       setTransactions(response.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to fetch transactions', error);
-      toast.error(error.response?.data?.message || 'Failed to load transactions');
     } finally {
       setLoading(false);
     }
@@ -49,56 +44,40 @@ const Transactions = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!amount || !type) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
     try {
-      const payload = {
-        amount: parseFloat(amount),
-        type: type.toLowerCase(),
-        category,
-        description,
-        date: date ? new Date(date).toISOString() : undefined
-      };
-
       if (editingId) {
-        await transactionAPI.update(editingId, payload);
-        toast.success('Transaction updated!');
+        await api.put(`/transactions/${editingId}`, {
+          type,
+          amount: parseFloat(amount),
+          category,
+          description,
+          date: new Date(date).toISOString()
+        });
         setEditingId(null);
       } else {
-        await transactionAPI.create(payload);
-        toast.success('Transaction added!');
+        await api.post('/transactions', {
+          type,
+          amount: parseFloat(amount),
+          category,
+          description,
+          date: new Date(date).toISOString()
+        });
       }
       setAmount('');
       setDescription('');
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate('');
       fetchTransactions();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to save transaction', error);
-      toast.error(error.response?.data?.message || 'Failed to save transaction');
     }
-  };
-
-  const handleEdit = (transaction: Transaction) => {
-    setEditingId(transaction._id);
-    setType(transaction.type);
-    setAmount(transaction.amount.toString());
-    setCategory(transaction.category);
-    setDescription(transaction.description);
-    setDate(new Date(transaction.date).toISOString().split('T')[0]);
   };
 
   const handleDelete = async (id: string) => {
     try {
-      await transactionAPI.delete(id);
-      toast.success('Transaction deleted');
+      await api.delete(`/transactions/${id}`);
       fetchTransactions();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to delete transaction', error);
-      toast.error(error.response?.data?.message || 'Failed to delete transaction');
     }
   };
 
@@ -114,15 +93,15 @@ const Transactions = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-green-50 p-6 rounded-xl border border-green-200">
           <p className="text-green-700 text-sm font-medium">Total Income</p>
-          <p className="text-3xl font-bold text-green-900">₹{totalIncome.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <p className="text-3xl font-bold text-green-900">{user?.country === 'India' ? '₹' : '$'}{totalIncome.toFixed(2)}</p>
         </div>
         <div className="bg-red-50 p-6 rounded-xl border border-red-200">
           <p className="text-red-700 text-sm font-medium">Total Expenses</p>
-          <p className="text-3xl font-bold text-red-900">₹{totalExpense.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <p className="text-3xl font-bold text-red-900">{user?.country === 'India' ? '₹' : '$'}{totalExpense.toFixed(2)}</p>
         </div>
         <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
           <p className="text-blue-700 text-sm font-medium">Balance</p>
-          <p className="text-3xl font-bold text-blue-900">₹{balance.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <p className="text-3xl font-bold text-blue-900">{user?.country === 'India' ? '₹' : '$'}{balance.toFixed(2)}</p>
         </div>
       </div>
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -173,7 +152,7 @@ const Transactions = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={t.type === 'income' ? 'text-green-500' : 'text-red-500'}>
-                    {t.type === 'income' ? '+' : '-'}₹{t.amount.toLocaleString("en-IN")}
+                    {t.type === 'income' ? '+' : '-'}{user?.country === 'India' ? '₹' : '$'}{t.amount}
                   </span>
                   <button onClick={() => handleEdit(t)} className="text-blue-500">Edit</button>
                   <button onClick={() => handleDelete(t._id)} className="text-red-500">Delete</button>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './GoalsPage.css';
-import toast from 'react-hot-toast';
 
 interface Goal {
   _id: string;
@@ -14,12 +13,10 @@ interface Goal {
 
 const GoalsPage = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [newGoal, setNewGoal] = useState({
-    name: "",
-    targetAmount: "",
-    deadline: "",
-    currentAmount: "0",
-  });
+  const [name, setName] = useState('');
+  const [targetAmount, setTargetAmount] = useState('');
+  const [currentAmount, setCurrentAmount] = useState('0');
+  const [deadline, setDeadline] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingMoneyId, setAddingMoneyId] = useState<string | null>(null);
   const [moneyToAdd, setMoneyToAdd] = useState('');
@@ -31,17 +28,12 @@ const GoalsPage = () => {
   const fetchGoals = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token found');
-        return;
-      }
-      const res = await axios.get('http://localhost:5001/api/goals', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/goals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setGoals(res.data.goals || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to load goals');
     }
   };
 
@@ -51,65 +43,46 @@ const GoalsPage = () => {
       const token = localStorage.getItem('token');
       
       if (editingId) {
-        await axios.put(`http://localhost:5001/api/goals/${editingId}`,
-          {
-            name: newGoal.name, 
-            targetAmount: parseFloat(newGoal.targetAmount), 
-            currentAmount: parseFloat(newGoal.currentAmount), 
-            deadline: newGoal.deadline 
-          },
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/goals/${editingId}`,
+          { name, targetAmount: parseFloat(targetAmount), currentAmount: parseFloat(currentAmount), deadline },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        toast.success('Goal updated!');
         setEditingId(null);
       } else {
-        await axios.post('http://localhost:5001/api/goals',
-          {
-            name: newGoal.name, 
-            targetAmount: parseFloat(newGoal.targetAmount), 
-            currentAmount: parseFloat(newGoal.currentAmount), 
-            deadline: newGoal.deadline 
-          },
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/goals`,
+          { name, targetAmount: parseFloat(targetAmount), currentAmount: parseFloat(currentAmount), deadline },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        toast.success('Goal created!');
       }
       
-      setNewGoal({
-        name: "",
-        targetAmount: "",
-        deadline: "",
-        currentAmount: "0",
-      });
+      setName('');
+      setTargetAmount('');
+      setCurrentAmount('0');
+      setDeadline('');
       fetchGoals();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Error saving goal';
-      toast.error(errorMessage);
+      alert(err.response?.data?.message || 'Error saving goal');
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5001/api/goals/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/goals/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Goal deleted');
       fetchGoals();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to delete goal');
     }
   };
 
   const handleEdit = (goal: Goal) => {
     setEditingId(goal._id);
-    setNewGoal({
-      name: goal.name,
-      targetAmount: goal.targetAmount.toString(),
-      currentAmount: goal.currentAmount.toString(),
-      deadline: goal.deadline,
-    });
+    setName(goal.name);
+    setTargetAmount(goal.targetAmount.toString());
+    setCurrentAmount(goal.currentAmount.toString());
+    setDeadline(goal.deadline);
   };
 
   const handleAddMoney = async (goalId: string) => {
@@ -119,18 +92,16 @@ const GoalsPage = () => {
       if (!goal) return;
 
       const newAmount = goal.currentAmount + parseFloat(moneyToAdd);
-      await axios.put(`http://localhost:5001/api/goals/${goalId}`,
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/goals/${goalId}`,
         { currentAmount: newAmount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      toast.success('Money added to goal!');
       setAddingMoneyId(null);
       setMoneyToAdd('');
       fetchGoals();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to add money');
     }
   };
 
@@ -181,19 +152,15 @@ const GoalsPage = () => {
           <input
             type="text"
             placeholder="Goal name (e.g., Buy a car)"
-            value={newGoal.name}
-            onChange={(e) =>
-              setNewGoal({ ...newGoal, name: e.target.value })
-            }
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
           <input
             type="number"
             placeholder="Target Amount (₹)"
-            value={newGoal.targetAmount}
-            onChange={(e) =>
-              setNewGoal({ ...newGoal, targetAmount: e.target.value })
-            }
+            value={targetAmount}
+            onChange={(e) => setTargetAmount(e.target.value)}
             required
             min="0"
             step="0.01"
@@ -201,10 +168,8 @@ const GoalsPage = () => {
           <input
             type="number"
             placeholder="Current Amount (₹)"
-            value={newGoal.currentAmount}
-            onChange={(e) =>
-              setNewGoal({ ...newGoal, currentAmount: e.target.value })
-            }
+            value={currentAmount}
+            onChange={(e) => setCurrentAmount(e.target.value)}
             required
             min="0"
             step="0.01"
@@ -212,22 +177,18 @@ const GoalsPage = () => {
           <input
             type="date"
             placeholder="Deadline"
-            value={newGoal.deadline}
-            onChange={(e) =>
-              setNewGoal({ ...newGoal, deadline: e.target.value })
-            }
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
             required
           />
           <button type="submit">{editingId ? 'Update' : 'Create'} Goal</button>
           {editingId && (
             <button type="button" onClick={() => {
               setEditingId(null);
-              setNewGoal({
-                name: "",
-                targetAmount: "",
-                deadline: "",
-                currentAmount: "0",
-              });
+              setName('');
+              setTargetAmount('');
+              setCurrentAmount('0');
+              setDeadline('');
             }}>Cancel</button>
           )}
         </form>

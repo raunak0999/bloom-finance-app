@@ -14,24 +14,31 @@ import aiRoutes from './routes/ai';
 
 
 const app = express();
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   console.error('Missing JWT_SECRET environment variable');
   process.exit(1);
 }
 
+// Root health-check route
+app.get("/", (req: Request, res: Response) => {
+  res.status(200).send("API is running");
+});
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 
-
 // MongoDB Connection
-mongoose.connect('mongodb+srv://raunakmed123:raunak@cluster0.v4bjng2.mongodb.net/')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://raunakmed123:raunak@cluster0.v4bjng2.mongodb.net/')
   .then(() => console.log('✓ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB error:', err));
+
 
 
 
@@ -123,15 +130,15 @@ app.get('/api/user', authMiddleware, async (req: AuthRequest, res: Response) => 
 // 💰 BUDGET ROUTES (GET + PUT)
 app.get('/api/budget', authMiddleware, (req: AuthRequest, res: Response) => {
   console.log('💰 GET BUDGET');
-  res.json({ 
+  res.json({
     budget: {
       categories: [
         { name: 'Food', allocated: 300, spent: 250 },
         { name: 'Transport', allocated: 200, spent: 180 },
         { name: 'Entertainment', allocated: 150, spent: 120 }
-      ], 
-      totalAllocated: 650, 
-      totalSpent: 550 
+      ],
+      totalAllocated: 650,
+      totalSpent: 550
     }
   });
 });
@@ -139,9 +146,9 @@ app.get('/api/budget', authMiddleware, (req: AuthRequest, res: Response) => {
 
 app.put('/api/budget', authMiddleware, (req: AuthRequest, res: Response) => {
   console.log('💾 SAVE BUDGET:', req.body);
-  res.json({ 
-    message: 'Budget saved successfully!', 
-    budget: req.body 
+  res.json({
+    message: 'Budget saved successfully!',
+    budget: req.body
   });
 });
 

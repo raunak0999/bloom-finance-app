@@ -25,6 +25,8 @@ input:focus, select:focus {
   outline: none;
 }
 
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -55,7 +57,7 @@ input:focus, select:focus {
   }
   .dark {
     --background: 222.2 84% 4.9%;
-    --foreground: 0 0% 98%;
+    --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
@@ -65,7 +67,7 @@ input:focus, select:focus {
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 0 0% 70%;
+    --muted-foreground: 215 20.2% 65.1%;
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -79,35 +81,15 @@ input:focus, select:focus {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+}
 
+
+
+@layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground dark:bg-gray-900 dark:text-orange-600;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  html {
-    transition: background-color 0.3s ease, color 0.3s ease, color-scheme 0.3s ease;
-  }
-
-  input, textarea, select {
-    @apply dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400;
-  }
-
-  /* Force full opacity on all text */
-  * {
-    text-opacity: 1 !important;
-  }
-
-  /* Specific fixes for cards/inputs */
-  .text-foreground {
-    @apply dark:text-gray-50; /* Bright white */
-  }
-  .text-muted-foreground {
-    @apply dark:text-gray-300; /* Medium gray */
+    @apply bg-background text-foreground;
   }
 }
-

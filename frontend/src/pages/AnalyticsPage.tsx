@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -26,14 +27,12 @@ const AnalyticsPage = () => {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5001/api/transactions', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/transactions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTransactions(res.data);
     } catch (err) {
       console.error(err);
-    } finally {
-      // Ensure loading state is handled if needed
     }
   };
 

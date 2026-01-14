@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { useContext } from 'react';
@@ -6,11 +6,11 @@ import { Login } from './components/Auth/Login';
 import { Register } from './components/Auth/Register';
 import { Dashboard } from './components/Dashboard';
 import Transactions from './pages/Transactions';
+import BudgetPage from './pages/BudgetPage';
 import GoalsPage from './pages/GoalsPage';
 import { Budget } from './components/Budget';
 import { Goals } from './components/Goals';
 import { Sidebar } from './components/Sidebar';
-import { MobileHeader } from './components/MobileHeader';
 import Investments from './pages/Investments';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AIChatPage from './pages/AIChatPage';
@@ -24,20 +24,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   return <>{children}</>;
-};
-
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  return (
-    <div className="flex min-h-screen">
-      <MobileHeader isOpen={isMobileMenuOpen} onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
-      <Sidebar isMobileOpen={isMobileMenuOpen} onMobileClose={() => setIsMobileMenuOpen(false)} />
-      <main className="flex-1 lg:ml-64 pt-16 lg:pt-0 w-full dark:bg-gray-900">
-        {children}
-      </main>
-    </div>
-  );
 };
 
 const AppContent: React.FC = () => {
@@ -54,9 +40,12 @@ const AppContent: React.FC = () => {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <Dashboard />
+              </div>
+            </div>
           </ProtectedRoute>
         }
       />
@@ -65,32 +54,40 @@ const AppContent: React.FC = () => {
         path="/transactions"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Transactions />
-            </Layout>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <Transactions />
+              </div>
+            </div>
           </ProtectedRoute>
         }
       />
 
-<Route
-  path="/budget"
-  element={
-    <ProtectedRoute>
-      <Layout>
-        <Budget />    
-      </Layout>
-    </ProtectedRoute>
-  }
-/>
-
+      <Route
+        path="/budget"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <BudgetPage />
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/goals"
         element={
           <ProtectedRoute>
-            <Layout>
-              <GoalsPage />
-            </Layout>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <GoalsPage />
+              </div>
+            </div>
           </ProtectedRoute>
         }
       />
@@ -99,9 +96,12 @@ const AppContent: React.FC = () => {
         path="/analytics"
         element={
           <ProtectedRoute>
-            <Layout>
-              <AnalyticsPage />
-            </Layout>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <AnalyticsPage />
+              </div>
+            </div>
           </ProtectedRoute>
         }
       />
@@ -110,9 +110,12 @@ const AppContent: React.FC = () => {
         path="/ai-chat"
         element={
           <ProtectedRoute>
-            <Layout>
-              <AIChatPage />
-            </Layout>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <AIChatPage />
+              </div>
+            </div>
           </ProtectedRoute>
         }
       />
