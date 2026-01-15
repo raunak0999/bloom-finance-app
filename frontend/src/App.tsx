@@ -5,15 +5,15 @@ import { useContext } from 'react';
 import { Login } from './components/Auth/Login';
 import { Register } from './components/Auth/Register';
 import { Dashboard } from './components/Dashboard';
-import Transactions from './pages/Transactions';
-import BudgetPage from './pages/BudgetPage';
-import GoalsPage from './pages/GoalsPage';
+import Transactions from './pages/Transactions.tsx';
+import BudgetPage from './pages/BudgetPage.tsx';
+import GoalsPage from './pages/GoalsPage.tsx';
 import { Budget } from './components/Budget';
 import { Goals } from './components/Goals';
 import { Sidebar } from './components/Sidebar';
 import Investments from './pages/Investments';
-import AnalyticsPage from './pages/AnalyticsPage';
-import AIChatPage from './pages/AIChatPage';
+import AnalyticsPage from './pages/AnalyticsPage.tsx';
+import AIChatPage from './pages/AIChatPage.tsx';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const context = useContext(AuthContext);
